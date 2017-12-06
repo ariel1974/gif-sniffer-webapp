@@ -12,7 +12,7 @@ services:
     environment:
      - DATABASE_HOST=db
   webapp:
-    build: ../../gif-sniffer-webapp
+    build: ./webapp
     container_name: gif_sniffer_webapp
     ports:
      - "8080:8080"
