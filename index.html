@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>GitSniffer</title>
+		
+		<link rel="apple-touch-icon" sizes="120x120" href="favicons/apple-touch-icon.png">
+		<link rel="icon" type="image/png" sizes="32x32" href="favicons/favicon-32x32.png">
+		<link rel="icon" type="image/png" sizes="16x16" href="favicons/favicon-16x16.png">
+		<link rel="manifest" href="favicons/manifest.json">
+		<link rel="mask-icon" href="favicons/safari-pinned-tab.svg" color="#5bbad5">
+		<meta name="theme-color" content="#ffffff">
+
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+		<script src="https://code.highcharts.com/highcharts.js"></script>	
+		<script src="https://code.highcharts.com/modules/data.js"></script>
+		<script src="https://code.highcharts.com/modules/drilldown.js"></script>
+
+		<link href='http://fonts.googleapis.com/css?family=Lato:100,300,400,700' rel='stylesheet' type='text/css'>
+		<link href='css/main.css' rel='stylesheet' type='text/css'>
+
+		<script>
+			var repos = new Array();
+			repos = [{
+		        "name": "sit-svc-metrics",
+		        "count": 15,
+		        "items": [
+		            {
+		                "id": 1,
+		                "file_name": "/file.txt",
+		                "line_number": 43,
+		                "committed_by": "user"
+		            },
+		            {
+		                "id": 2,
+		                "file_name": "/file1.txt",
+		                "line_number": 43,
+		                "committed_by": "user"
+		            },
+		            {
+		                "id": 3,
+		                "file_name": "/file2.txt",
+		                "line_number": 43,
+		                "committed_by": "user"
+		            },
+		            {
+		                "id": 4,
+		                "file_name": "/file3.txt",
+		                "line_number": 43,
+		                "committed_by": "user"
+		            },
+		            {
+		                "id": 5,
+		                "file_name": "/file4.txt",
+		                "line_number": 43,
+		                "committed_by": "user"
+		            }
+		        ]
+		    },{
+		        "name": "sit-svc-audit",
+		        "count": 5,
+		        "items": [
+		            {
+		                "id": 1,
+		                "file_name": "/file5.txt",
+		                "line_number": 43,
+		                "committed_by": "user"
+		            },
+		            {
+		                "id": 2,
+		                "file_name": "/file6.txt",
+		                "line_number": 43,
+		                "committed_by": "user"
+		            },
+		            {
+		                "id": 3,
+		                "file_name": "/file7.txt",
+		                "line_number": 43,
+		                "committed_by": "user"
+		            },
+		            {
+		                "id": 4,
+		                "file_name": "/file8.txt",
+		                "line_number": 43,
+		                "committed_by": "user"
+		            }
+		        ]
+		    }];
+
+			function getReposData() {
+				var _data = []
+				repos.forEach(function(repo) {
+					_data.push({
+			            name: repo["name"],
+			            y: repo["count"],
+			            drilldown: repo["name"]
+					})
+				});
+				return _data;
+			}
+
+			function getReposFilesData() {
+				var _data = []
+				repos.forEach(function(repo) {
+					alert(repo["items"].length);
+					_data.push({
+			            name: repo["name"],
+			            id: repo["name"],
+			            data: repo["items"]
+					})
+				});
+				return _data;
+			}
+
+			getReposFilesData();
+
+			$(function () { 
+				Highcharts.setOptions({
+				    colors: ['#525563', '#74828e', '#96aabb', '#97c0cd', '#b8b4b0', '#cfcac6', '#c05c58', '#e17f7c', '#e1d18f', '#f2e2cd']
+				});
+
+			    var myChart = Highcharts.chart('topRiskyRepos', {
+				    chart: {
+				        type: 'column'
+				    },
+				    title: {
+				        text: ''
+				    },
+				    credits: {
+					    enabled: false
+					},
+				    xAxis: {
+				        type: 'category'
+				    },
+				    yAxis: {
+				        title: {
+				            text: ''
+				        }
+
+				    },
+				    legend: {
+				        enabled: false
+				    },
+				    plotOptions: {
+				        series: {
+				            borderWidth: 0,
+				            dataLabels: {
+				                enabled: true,
+				                format: '{point.y:.1f}%'
+				            }
+				        }
+				    },
+
+				    tooltip: {
+				        headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+				        pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y:.2f}%</b> of total<br/>'
+				    },
+
+				    series: [{
+				        name: 'Repo',
+				        colorByPoint: true,
+				        data: getReposData()
+				    }]
+				});
+
+
+				Highcharts.chart('vulnerabilitiesOverTime', {
+				    chart: {
+				        type: 'line'
+				    },
+				    title: {
+				        text: ''
+				    },
+				    xAxis: {
+				        categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+				    },
+				    yAxis: {
+				        title: {
+				            text: ''
+				        }
+				    },
+				    plotOptions: {
+				        line: {
+				            dataLabels: {
+				                enabled: true
+				            },
+				            enableMouseTracking: false
+				        }
+				    },
+				    series: [{
+				        name: 'Tokyo',
+				        data: [7.0, 6.9, 9.5, 14.5, 18.4, 21.5, 25.2, 26.5, 23.3, 18.3, 13.9, 9.6]
+				    }]
+				});
+			});
+		</script>
+	</head>
+	<body>
+		<header>
+			<div class="main-header">
+				<div class="logo">GitSniffer</div>
+				<div class="slogen">Snif for vulnerabilities in your Git repositories</div>
+			</div>
+		</header>
+		<section class="main-container">
+			<section class="main">
+				<div class="panel">
+					<h1>Top 10 Risky Repos</h1>
+					<h5>Most risky repos sniffed</h5>
+					<div class="chart-container">
+						<div id="topRiskyRepos" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+					</div>
+				</div>
+				<div class="panel">
+					<h1>Vulnerabilities over time</h1>
+					<h5>Ammount of sniffed vulnerabilities over time</h5>
+					<div class="chart-container">
+						<div id="vulnerabilitiesOverTime" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+					</div>
+				</div>	
+			</section>	
+		</section>
+	</body>
+</html>		
