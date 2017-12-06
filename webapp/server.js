@@ -24,6 +24,19 @@ app.get('/top_risky_repos', (req, res) => {
     });
 });
 
+app.get('/over_time', (req, res) => {
+
+    fetch(`http://${api_host}:${api_port}/vulnerabilities_over_time`)
+        .then(function (data) {
+            return data.json();
+        }).then(function (json) {
+
+            res.setHeader('Content-Type', 'application/json');
+            res.send(JSON.stringify(json, null, 3) );
+
+    });
+});
+
 
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.html');
