@@ -4,13 +4,16 @@ var app = express();
 var fs = require('fs');
 var fetch = require('node-fetch');
 
+let api_host = process.env.GIT_API_HOST;
+let api_port = process.env.GIT_API_PORT;
+
 app.use('/images', express.static('images'));
 app.use('/css', express.static('css'));
 app.use('/favicons', express.static('favicons'));
 
 app.get('/top_risky_repos', (req, res) => {
 
-    fetch('http://localhost:8123/top_risky_repos')
+    fetch(`http://${api_host}:${api_port}/top_risky_repos`)
         .then(function (data) {
             return data.json();
         }).then(function (json) {

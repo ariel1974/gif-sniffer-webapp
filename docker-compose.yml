@@ -1,0 +1,25 @@
+version: '2'
+services:
+  vulnerabilities-service:
+    build: ./vulnerabilities-service
+    container_name: vulnerabilities_service
+    ports:
+     - "8123:8123"
+    links:
+      - db:db
+    depends_on:
+     - db
+    environment:
+     - DATABASE_HOST=db
+  webapp:
+    build: ../../gif-sniffer-webapp
+    container_name: gif_sniffer_webapp
+    ports:
+     - "8080:8080"
+    depends_on:
+     - vulnerabilities-service
+    environment:
+     - GIT_API_HOST=vulnerabilities-service
+     - GIT_API_PORT=8123
+  db:
+    build: ./test-database
