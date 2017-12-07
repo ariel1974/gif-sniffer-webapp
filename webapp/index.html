@@ -39,8 +39,7 @@
                 data.forEach(function (repo) {
                     _data.push({
                         name: repo["name"],
-                        y: repo["count"],
-                        drilldown: repo["name"]
+                        y: repo["count"]
                     })
                 });
                 return _data;
@@ -60,6 +59,7 @@
                     type: 'category'
                 },
                 yAxis: {
+                    allowDecimals: false,
                     title: {
                         text: ''
                     }
@@ -72,18 +72,19 @@
                     series: {
                         borderWidth: 0,
                         dataLabels: {
-                            enabled: true,
-                            format: '{point.y:.1f}%'
+                            enabled: true
                         }
                     }
                 },
 
                 tooltip: {
-                    headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
-                    pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y:.2f}%</b> of total<br/>'
+                    enabled: false,
+                    headerFormat: '',
+                    pointFormat: '<span style="font-size:15px;">{point.name}</span><br/><span style="font-size:13px">Num of files:<b>{point.y}</b></span></span>'
                 },
 
                 series: [{
+                    maxPointWidth: 70,
                     name: 'Repo',
                     colorByPoint: true,
                     data: getReposData()
@@ -98,6 +99,34 @@
         fetch('/over_time').then(function (res) {
             return res.json();
         }).then(function (data) {
+            var overtimeDates = getOvertimeDate();
+            function getOvertimeDate() {
+                var _data = data.reduce(function (a, b) {
+                    if (a.indexOf(b.detected_on.substring(0, b.detected_on.indexOf("T"))) == -1) {
+                        a.push(b.detected_on.substring(0, b.detected_on.indexOf("T")));
+                    } else {
+
+                    }
+                  return a;
+                }, []);
+
+                return _data;
+            }
+
+            var overtimeCount = getOvertimeCount();
+            function getOvertimeCount() {
+                var _data = []
+                overtimeDates.forEach(function(item) {
+                    _data.push(data.filter(filterdate(item)).length);
+                });
+                return _data;
+            }
+
+            function filterdate(date) {
+                return function(item) {
+                    return item.detected_on.substring(0, item.detected_on.indexOf("T")) === date;
+                }
+            }
 
             Highcharts.chart('vulnerabilitiesOverTime', {
                 chart: {
@@ -106,10 +135,14 @@
                 title: {
                     text: ''
                 },
+                credits: {
+                    enabled: false
+                },
                 xAxis: {
-                    categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+                    categories: overtimeDates
                 },
                 yAxis: {
+                    allowDecimals: false,
                     title: {
                         text: ''
                     }
@@ -123,8 +156,8 @@
                     }
                 },
                 series: [{
-                    name: 'Tokyo',
-                    data: [7.0, 6.9, 9.5, 14.5, 18.4, 21.5, 25.2, 26.5, 23.3, 18.3, 13.9, 9.6]
+                    name: 'Number of files',
+                    data: overtimeCount
                 }]
             });
 
@@ -136,21 +169,21 @@
 <header>
     <div class="main-header">
         <div class="logo">GitSniffer</div>
-        <div class="slogen">Snif for vulnerabilities in your Git repositories</div>
+        <div class="slogen">Sniffs for vulnerabilities in your Git repositories</div>
     </div>
 </header>
 <section class="main-container">
     <section class="main">
         <div class="panel">
             <h1>Top 10 Risky Repos</h1>
-            <h5>Most risky repos sniffed</h5>
+            <h5>Git Repositories containing the most risky files</h5>
             <div class="chart-container">
                 <div id="topRiskyRepos" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
             </div>
         </div>
         <div class="panel">
             <h1>Vulnerabilities over time</h1>
-            <h5>Ammount of sniffed vulnerabilities over time</h5>
+            <h5>Number of risky files sniffed over time</h5>
             <div class="chart-container">
                 <div id="vulnerabilitiesOverTime" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
             </div>
