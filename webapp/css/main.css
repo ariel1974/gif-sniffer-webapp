@@ -4,7 +4,23 @@ body {
     font-style: normal;
     background-color: #fff;
     margin: 0px;
+	font-size: 13px;
     color: #333333;
+}
+
+.table {
+	font-size: 13px;
+    color: #333333;
+}
+
+.table td,
+.table th {
+	text-align: left;
+	padding: 5px;
+}
+
+.table td {
+	font-weight: 300;
 }
 
 section.main-container,
@@ -63,6 +79,52 @@ h5 {
 
 .chart-container {
 	margin: 20px 0px;
+	display: table-row;
+}
+
+.table-cell {
+	display: table-cell;
+}
+
+.full-width-chart {
+	width: 960px;
+	height: 400px;
+	margin: 0 auto
+}
+
+.mid-width-chart {
+	width: 660px;
+	height: 400px;
+	margin: 0 auto
+}
+
+#topRiskyTab {
+	padding-left: 20px;
+}
+
+.risk {
+    display: inline;
+    padding: .2em .6em .3em;
+    font-size: 75%;
+    font-weight: 700;
+    line-height: 1;
+    color: #fff;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: .25em;
+}
+
+.risk-critical {
+	background-color: #d43427;
+}
+
+.risk-alert {
+	background-color: #e6d616 ;
+}
+
+.risk-warning {
+	background-color: #eaa419;
 }
 
 /* Highchart */

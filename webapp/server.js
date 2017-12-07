@@ -4,8 +4,8 @@ var app = express();
 var fs = require('fs');
 var fetch = require('node-fetch');
 
-let api_host = process.env.GIT_API_HOST;
-let api_port = process.env.GIT_API_PORT;
+let api_host = process.env.GIT_API_HOST || 'localhost';
+let api_port = process.env.GIT_API_PORT || 8123
 
 app.use('/images', express.static('images'));
 app.use('/css', express.static('css'));

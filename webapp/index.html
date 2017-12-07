@@ -15,11 +15,27 @@
     <script src="https://code.highcharts.com/modules/data.js"></script>
     <script src="https://code.highcharts.com/modules/drilldown.js"></script>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.js"></script>
+
     <link href='http://fonts.googleapis.com/css?family=Lato:100,300,400,700' rel='stylesheet' type='text/css'>
     <link href='css/main.css' rel='stylesheet' type='text/css'>
 </head>
 <body>
 <script>
+
+    var __data;
+
+        var mapping = {
+            'reason_1': 'critical',
+            'reason_2': 'warning',
+            'reason_3': 'alert',
+            'reason_4': 'warning',
+            'reason_5': 'warning',
+            'aws_access_key': 'critical',
+            'aws_secret__key': 'alert',
+            'sshkey': 'alert',
+            'email': 'warning',
+        };
 
     $(function () {
 
@@ -34,6 +50,8 @@
             return res.json();
         }).then(function (data) {
 
+            __data = data;
+
             function getReposData() {
                 var _data = []
                 data.forEach(function (repo) {
@@ -43,6 +61,40 @@
                     })
                 });
                 return _data;
+            }
+
+            __showVulnerabilitiesForRepo(__data[0].name);
+            function __showVulnerabilitiesForRepo(repo_name) {
+
+                var items = _.filter(__data, {name: repo_name})[0].items;
+
+                // https://github.com/Cloudlock/incubator/blob/master/ worker.py#L1
+
+                var table = $('<table class="table"></table>');
+                var row = $('<thead><tr></tr></thead>');
+                    row.append(`<th>Severity</th>`);
+                    row.append(`<th>Reason</th>`);
+                    row.append(`<th>File Name</th>`);
+                    table.append(row);
+
+
+                for (var i = 0; i < items.length; i++) {
+
+                    // file name : /home/ec2-user/data/incubator.git/incubator/README
+                    //items[i].file_name = '/home/ec2-user/data/incubator.git/incubator/README';
+
+                    var file_name = items[i].file_name.replace('/home/ec2-user/data/incubator.git/incubator/', '')
+                    var git_link = `https://github.com/Cloudlock/incubator/blob/master/${file_name}#L${items[i].line_number+1}`;
+
+                    var row = $('<tr></tr>');
+                    row.append(`<td><div class="risk risk-${mapping[items[i].reason]}">${mapping[items[i].reason]}</div></td>`);
+                    row.append(`<td>${items[i].reason}</td>`);
+                    row.append(`<td><a target="_blank" href="${git_link}">${file_name}</a> (#${items[i].line_number+1})</td>`);
+                    table.append(row);
+                }
+
+                $('#topRiskyTab').html('');
+                $('#topRiskyTab').append(table);
             }
 
             Highcharts.chart('topRiskyRepos', {
@@ -84,6 +136,15 @@
                 },
 
                 series: [{
+                    point: {
+                        events: {
+                            click: function () {
+
+                                __showVulnerabilitiesForRepo(this.name);
+                                //alert('name: ' + this.name + ', value: ' + this.y);
+                            }
+                        }
+                    },
                     maxPointWidth: 70,
                     name: 'Repo',
                     colorByPoint: true,
@@ -99,34 +160,26 @@
         fetch('/over_time').then(function (res) {
             return res.json();
         }).then(function (data) {
-            var overtimeDates = getOvertimeDate();
-            function getOvertimeDate() {
-                var _data = data.reduce(function (a, b) {
-                    if (a.indexOf(b.detected_on.substring(0, b.detected_on.indexOf("T"))) == -1) {
-                        a.push(b.detected_on.substring(0, b.detected_on.indexOf("T")));
-                    } else {
-
-                    }
-                  return a;
-                }, []);
-
-                return _data;
-            }
-
-            var overtimeCount = getOvertimeCount();
-            function getOvertimeCount() {
-                var _data = []
-                overtimeDates.forEach(function(item) {
-                    _data.push(data.filter(filterdate(item)).length);
-                });
-                return _data;
-            }
-
-            function filterdate(date) {
-                return function(item) {
-                    return item.detected_on.substring(0, item.detected_on.indexOf("T")) === date;
+            var overtimeObject = getOvertimeObject();
+            function getOvertimeObject() {
+                var _data = {}
+                var i = data.length;
+                while (i--) {
+                    var d = data[i].detected_on.substring(0, data[i].detected_on.indexOf("T"));
+                    if (!_data[d]) _data[d] = 0;
+                    _data[d] += 1;
                 }
+                var counts = [];
+                var dates = [];
+                for (var i in _data) {
+                    counts.push(_data[i]);
+                    dates.push(i);
+                }
+
+                return {counts:counts, dates:dates};
             }
+            var overtimeDates = overtimeObject.dates;
+            var overtimeCount = overtimeObject.counts;
 
             Highcharts.chart('vulnerabilitiesOverTime', {
                 chart: {
@@ -175,17 +228,18 @@
 <section class="main-container">
     <section class="main">
         <div class="panel">
-            <h1>Top 10 Risky Repos</h1>
+            <h1>Top Risky Repos</h1>
             <h5>Git Repositories containing the most risky files</h5>
             <div class="chart-container">
-                <div id="topRiskyRepos" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+                <div id="topRiskyRepos" class="table-cell mid-width-chart"></div>
+                <div id="topRiskyTab" class="table-cell"></div>
             </div>
         </div>
         <div class="panel">
             <h1>Vulnerabilities over time</h1>
             <h5>Number of risky files sniffed over time</h5>
             <div class="chart-container">
-                <div id="vulnerabilitiesOverTime" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+                <div id="vulnerabilitiesOverTime" class="full-width-chart"></div>
             </div>
         </div>
     </section>
